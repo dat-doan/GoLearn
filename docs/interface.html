@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Go Cheatsheet: Interface</title>
+<style>
+:root{--bg:#fafaf8;--fg:#1d1d1b;--mut:#6b6b66;--card:#fff;--bd:#e2e1dc;--acc:#00899c;--accbg:#e1f3f6;--ok:#2d7a3e;--okbg:#e5f4e8;--bad:#b3261e;--badbg:#fbe9e7;--warn:#9a6700;--warnbg:#fff4d6;--code:#f1f0ec;
+--cell:#fff;--cellbd:#8a8982;--hl:#bfe6ec;--hl2:#ffe3a3;--ptr:#d9480f;--str:#8f4a00}
+@media(prefers-color-scheme:dark){:root{--bg:#161715;--fg:#ecebe6;--mut:#9a9992;--card:#1f201e;--bd:#33342f;--acc:#4cc3d6;--accbg:#12353b;--ok:#6fcf86;--okbg:#17301d;--bad:#ff8a80;--badbg:#3a1b18;--warn:#f0c15a;--warnbg:#38300f;--code:#262723;--cell:#262723;--cellbd:#77766f;--hl:#1c5560;--hl2:#6b5316;--ptr:#ff9e64;--str:#e8b46a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:28px;margin:0 0 4px}
+.sub{color:var(--mut);margin:0 0 16px}
+h2{font-size:20px;margin:36px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--acc);scroll-margin-top:12px}
+h3{font-size:16px;margin:0 0 8px}
+p{margin:6px 0}
+ul{margin:6px 0;padding-left:20px}
+li{margin:3px 0}
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+.toc a{font-size:13px;text-decoration:none;color:var(--acc);background:var(--accbg);padding:3px 10px;border-radius:99px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g2w{grid-template-columns:repeat(auto-fit,minmax(460px,1fr))}
+@media(max-width:560px){.g2w{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;overflow:hidden;min-width:0}
+code,pre{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px}
+code{background:var(--code);padding:1px 5px;border-radius:4px}
+pre{background:var(--code);padding:12px 14px;border-radius:8px;overflow-x:auto;margin:8px 0;line-height:1.5}
+pre code{background:none;padding:0}
+pre.no{border-left:4px solid var(--bad)}
+pre.yes{border-left:4px solid var(--ok)}
+.k{color:var(--acc);font-weight:600}.c{color:var(--mut);font-style:italic}.s{color:var(--str)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--bd);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--accbg)}
+.tw{overflow-x:auto}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:99px;margin-right:6px}
+.bad{background:var(--badbg);color:var(--bad)}.ok{background:var(--okbg);color:var(--ok)}.warn{background:var(--warnbg);color:var(--warn)}
+.pit{border-left:4px solid var(--bad)}
+.bp{border-left:4px solid var(--ok)}
+.rule{background:var(--accbg);border-radius:8px;padding:10px 14px;margin:10px 0}
+.num{display:inline-block;min-width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:var(--acc);color:var(--bg);font-size:12px;font-weight:700;margin-right:6px}
+svg{width:100%;height:auto;display:block}
+svg text{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;fill:var(--fg)}
+svg .m{fill:var(--mut);font-size:12px}
+svg .b{font-weight:700}
+svg .okt{fill:var(--ok);font-weight:700}
+svg .badt{fill:var(--bad);font-weight:700}
+svg .warnt{fill:var(--warn);font-weight:700}
+svg .box{fill:var(--card);stroke:var(--cellbd);stroke-width:1.5}
+svg .ibox{fill:var(--accbg);stroke:var(--acc);stroke-width:1.5}
+svg .pkg{fill:none;stroke:var(--cellbd);stroke-width:1.5;stroke-dasharray:6 4}
+svg .cell{fill:var(--cell);stroke:var(--cellbd);stroke-width:1.5}
+svg .hl{fill:var(--hl);stroke:var(--cellbd);stroke-width:1.5}
+svg .hl2{fill:var(--hl2);stroke:var(--cellbd);stroke-width:1.5}
+svg .okbox{fill:var(--okbg);stroke:var(--ok);stroke-width:1.5}
+svg .warnbox{fill:var(--warnbg);stroke:var(--warn);stroke-width:1.5}
+svg .badbox{fill:var(--badbg);stroke:var(--bad);stroke-width:1.5}
+svg .arr{stroke:var(--acc);stroke-width:2;fill:none}
+svg .okl{stroke:var(--ok);stroke-width:2;fill:none}
+svg .badl{stroke:var(--bad);stroke-width:2;fill:none;stroke-dasharray:6 4}
+svg .ptr{stroke:var(--ptr);stroke-width:2;fill:none}
+svg .ha{fill:var(--acc)}svg .hok{fill:var(--ok)}svg .hbad{fill:var(--bad)}svg .hptr{fill:var(--ptr)}
+svg .dot{fill:var(--ptr)}
+.legend{font-size:13px;color:var(--mut);margin-top:6px}
+@media print{body{background:#fff}.card{break-inside:avoid}.toc{display:none}}
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>Go Cheatsheet: Interface</h1>
+<p class="sub">Ghi nhớ nhanh đặc tính · sơ đồ minh hoạ · ví dụ thực hành · lỗi thường gặp · best practices (Go 1.21+). Ví dụ chạy được: <code>src/interface_examples.go</code></p>
+
+<nav class="toc">
+ <a href="#s1">1. Cốt lõi</a><a href="#s2">2. Bên trong</a><a href="#s3">3. Method set</a><a href="#s4">4. Bẫy nil</a><a href="#s5">5. Assertion</a><a href="#s6">6. Embedding</a><a href="#s7">7. any · so sánh · generics</a><a href="#s8">8. Stdlib</a><a href="#s9">9. Thực hành</a><a href="#s10">10. Lỗi hay gặp</a><a href="#s11">11. Best practices</a><a href="#s12">12. Tra nhanh</a>
+</nav>
+
+<div class="rule"><b>Một câu để nhớ:</b> Interface là <b>tập method</b> (hành vi). Type nào có đủ method thì <b>tự động thỏa mãn</b>, không cần khai báo. Một giá trị interface là cặp <code>(dynamic type, dynamic value)</code>, và nó <b>chỉ bằng nil khi cả hai đều nil</b>.</div>
+
+<!-- ================= 1 ================= -->
+<h2 id="s1">1. Khái niệm cốt lõi: thỏa mãn ngầm định</h2>
+<div class="grid g2w">
+<div class="card">
+<svg viewBox="0 0 660 240" role="img" aria-label="Dog và *Robot thỏa mãn Speaker, Cat thì không">
+ <defs>
+  <marker id="m1ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="hok"/></marker>
+  <marker id="m1bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="hbad"/></marker>
+ </defs>
+ <rect class="box" x="10" y="14" width="260" height="58" rx="6"/>
+ <text x="22" y="38" class="b">type Dog struct{…}</text><text x="22" y="60" class="m">func (Dog) Speak() string</text>
+ <rect class="box" x="10" y="90" width="260" height="58" rx="6"/>
+ <text x="22" y="114" class="b">type Robot struct{…}</text><text x="22" y="136" class="m">func (*Robot) Speak() string</text>
+ <rect class="box" x="10" y="166" width="260" height="58" rx="6"/>
+ <text x="22" y="190" class="b">type Cat struct{…}</text><text x="22" y="212" class="m">func (Cat) Meow() string</text>
+ <rect class="ibox" x="410" y="78" width="240" height="78" rx="6"/>
+ <text x="424" y="104" class="b">type Speaker interface {</text><text x="444" y="126">Speak() string</text><text x="424" y="146" class="b">}</text>
+ <path class="okl" d="M270,43 C345,43 340,98 406,98" marker-end="url(#m1ok)"/>
+ <text x="300" y="40" class="okt">Dog ✓</text>
+ <path class="okl" d="M270,119 L406,119" marker-end="url(#m1ok)"/>
+ <text x="276" y="111" class="m">*Robot ✓ Robot ✗</text>
+ <path class="badl" d="M270,195 C345,195 340,140 406,140" marker-end="url(#m1bad)"/>
+ <text x="282" y="220" class="badt">Cat ✗ thiếu Speak()</text>
+</svg>
+<p class="legend">Không có từ khoá <code>implements</code>: có đủ method với đúng chữ ký là tự động thỏa mãn (structural typing, "duck typing" nhưng kiểm tra lúc compile).</p>
+</div>
+<div class="card">
+<pre><code>type Speaker interface {
+    Speak() string
+}
+
+type Dog struct{ Name string }
+func (d Dog) Speak() string { return d.Name + ": Gâu!" }
+
+type Robot struct{ ID int }
+func (r *Robot) Speak() string { return fmt.Sprintf("R-%d: Bíp!", r.ID) }
+
+// Kiểm tra lúc compile, không tốn gì lúc chạy
+var _ Speaker = Dog{}
+var _ Speaker = (*Robot)(nil)
+
+for _, s := range []Speaker{Dog{"Rex"}, &amp;Robot{7}} {
+    fmt.Println(s.Speak()) // dynamic dispatch
+}
+// Rex: Gâu!
+// R-7: Bíp!</code></pre>
+</div>
+</div>
+
+<div class="card" style="margin-top:14px">
+<h3>Đặc tính cần nhớ</h3>
+<div class="tw"><table>
+<tr><th>Đặc tính</th><th>Ý nghĩa</th></tr>
+<tr><td>Implicit</td><td>Không khai báo quan hệ. Package định nghĩa type <b>không cần biết</b> interface tồn tại → interface có thể được viết <i>sau</i>, ở package khác.</td></tr>
+<tr><td>Chỉ có method</td><td>Interface (dùng làm kiểu biến) chỉ chứa method, không có field. Interface có <code>~int | string</code> chỉ dùng được làm constraint generics.</td></tr>
+<tr><td>Zero value = <code>nil</code></td><td><code>var s Speaker</code> → <code>s == nil</code>; gọi <code>s.Speak()</code> sẽ panic nil pointer dereference.</td></tr>
+<tr><td>Là cặp (type, value)</td><td><code>%T</code> in ra dynamic type, <code>%v</code> in ra dynamic value.</td></tr>
+<tr><td>Gán là copy</td><td><code>s = d</code> copy giá trị <code>d</code> vào interface. Sửa <code>d</code> sau đó không ảnh hưởng <code>s</code> (trừ khi gán con trỏ).</td></tr>
+<tr><td>Kiểu tĩnh vs động</td><td>Compiler chỉ cho gọi method có trong interface. Muốn truy cập field/method khác, phải type assertion.</td></tr>
+</table></div>
+</div>
+
+<!-- ================= 2 ================= -->
+<h2 id="s2">2. Bên trong một interface value</h2>
+<div class="grid g2w">
+<div class="card">
+<svg viewBox="0 0 680 250" role="img" aria-label="Cấu trúc iface: con trỏ tab tới itab, con trỏ data tới giá trị">
+ <defs><marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="hptr"/></marker></defs>
+ <text x="10" y="20" class="b">var s Speaker = &amp;Robot{ID: 7}</text>
+ <text x="20" y="46" class="m">s  (iface = 2 word = 16 byte)</text>
+ <rect class="hl" x="20" y="54" width="150" height="36"/><text x="32" y="77">tab</text><circle class="dot" cx="150" cy="72" r="4"/>
+ <rect class="hl2" x="20" y="90" width="150" height="36"/><text x="32" y="113">data</text><circle class="dot" cx="150" cy="108" r="4"/>
+ <rect class="box" x="260" y="40" width="230" height="122" rx="6"/>
+ <text x="272" y="62" class="b">itab</text><text x="312" y="62" class="m">(cache theo cặp)</text>
+ <text x="272" y="84">inter: Speaker</text>
+ <text x="272" y="104">_type: *Robot</text>
+ <text x="272" y="124" class="m">hash, …</text>
+ <text x="272" y="148">fun[0]</text><circle class="dot" cx="336" cy="144" r="4"/>
+ <path class="ptr" d="M150,72 L256,72" marker-end="url(#m2)"/>
+ <rect class="box" x="260" y="188" width="170" height="40" rx="6"/><text x="272" y="213">Robot{ID: 7}</text>
+ <path class="ptr" d="M150,108 C215,108 200,208 256,208" marker-end="url(#m2)"/>
+ <rect class="box" x="530" y="124" width="140" height="40" rx="6"/><text x="540" y="149">(*Robot).Speak</text>
+ <path class="ptr" d="M336,144 L526,144" marker-end="url(#m2)"/>
+ <text x="470" y="198" class="b">var x any = 42</text>
+ <rect class="hl" x="470" y="206" width="95" height="32"/><text x="478" y="227">_type:int</text>
+ <rect class="hl2" x="565" y="206" width="95" height="32"/><text x="573" y="227">data→42</text>
+</svg>
+<p class="legend"><code>s.Speak()</code> ≈ <code>s.tab.fun[0](s.data)</code>: tra bảng rồi gọi gián tiếp. Interface rỗng (<code>any</code>) dùng dạng gọn hơn <code>eface{_type, data}</code> vì không có method nào.</p>
+</div>
+<div class="card">
+<h3>Hệ quả thực tế</h3>
+<ul>
+<li><b>2 word:</b> truyền interface rẻ như truyền 2 con trỏ.</li>
+<li><b>Gán value → thường cấp phát heap:</b> giá trị được copy và <code>data</code> trỏ tới bản copy (trừ trường hợp compiler tối ưu được, ví dụ số nhỏ, giá trị hằng hoặc con trỏ).</li>
+<li><b>Gọi gián tiếp:</b> khó inline. Trong vòng lặp nóng, cân nhắc dùng concrete type hoặc generics (PGO có thể devirtualize).</li>
+<li><b>Không sửa được value bên trong:</b> <code>s.(Dog).Name = "x"</code> → lỗi compile <i>neither addressable</i>. Muốn sửa, hãy lưu con trỏ <code>*Dog</code>.</li>
+</ul>
+<pre><code>d := Dog{"Rex"}
+var s Speaker = d   // copy
+d.Name = "Max"
+fmt.Println(s.Speak())       // Rex: Gâu!  (vẫn là Rex)
+fmt.Printf("%T\n", s)        // main.Dog
+
+var z Speaker
+fmt.Printf("%v %T\n", z, z)  // &lt;nil&gt; &lt;nil&gt;</code></pre>
+</div>
+</div>
+
+<!-- ================= 3 ================= -->
+<h2 id="s3">3. Method set &amp; receiver: value hay pointer?</h2>
+<div class="grid g2w">
+<div class="card">
+<svg viewBox="0 0 660 210" role="img" aria-label="Method set của *T bao gồm method set của T">
+ <rect class="ibox" x="10" y="10" width="330" height="190" rx="8"/>
+ <text x="24" y="34" class="b">method set của *T</text>
+ <rect class="box" x="28" y="48" width="294" height="82" rx="6"/>
+ <text x="40" y="72" class="b">method set của T</text>
+ <text x="40" y="96">func (t T) Get() int</text>
+ <text x="40" y="118" class="m">(value receiver)</text>
+ <text x="40" y="160">func (t *T) Set(v int)</text>
+ <text x="40" y="182" class="m">(pointer receiver)</text>
+ <text x="364" y="34" class="b">interface{ Get(); Set() }</text>
+ <text x="364" y="60" class="badt">var _ GetSetter = T{}   ✗</text>
+ <text x="364" y="84" class="okt">var _ GetSetter = &amp;T{}  ✓</text>
+ <text x="364" y="122" class="b">interface{ Get() }</text>
+ <text x="364" y="148" class="okt">var _ Getter = T{}   ✓</text>
+ <text x="364" y="172" class="okt">var _ Getter = &amp;T{}  ✓</text>
+ <text x="364" y="198" class="m">*T có cả Get lẫn Set</text>
+</svg>
+</div>
+<div class="card">
+<div class="tw"><table>
+<tr><th>Receiver của method</th><th><code>T</code> thỏa?</th><th><code>*T</code> thỏa?</th></tr>
+<tr><td><code>func (t T) M()</code></td><td><span class="tag ok">✓</span></td><td><span class="tag ok">✓</span></td></tr>
+<tr><td><code>func (t *T) M()</code></td><td><span class="tag bad">✗</span></td><td><span class="tag ok">✓</span></td></tr>
+</table></div>
+<p><b>Vì sao?</b> Giá trị lưu trong interface <b>không addressable</b>, nên Go không thể tự lấy <code>&amp;</code> để gọi pointer method. (Khi gọi trực tiếp <code>v.M()</code> trên biến thì Go tự thêm <code>&amp;v</code>, nhưng qua interface thì không.)</p>
+<pre class="no"><code>var _ Speaker = Robot{}
+// cannot use Robot{} as Speaker value:
+// Robot does not implement Speaker
+// (method Speak has pointer receiver)</code></pre>
+<pre class="yes"><code>var _ Speaker = &amp;Robot{}  // ✓ dùng con trỏ</code></pre>
+</div>
+</div>
+
+<!-- ================= 4 ================= -->
+<h2 id="s4">4. Bẫy kinh điển: nil interface ≠ interface chứa nil</h2>
+<div class="grid g2w">
+<div class="card">
+<svg viewBox="0 0 660 200" role="img" aria-label="So sánh interface nil và interface chứa con trỏ nil">
+ <rect class="okbox" x="10" y="10" width="310" height="180" rx="8"/>
+ <text x="24" y="36" class="b">var err error</text>
+ <rect class="cell" x="24" y="54" width="135" height="46"/><rect class="cell" x="159" y="54" width="135" height="46"/>
+ <text x="36" y="74" class="m">type</text><text x="36" y="92">nil</text>
+ <text x="171" y="74" class="m">value</text><text x="171" y="92">nil</text>
+ <text x="24" y="136" class="okt">err == nil  → true</text>
+ <text x="24" y="164" class="m">interface nil thật sự</text>
+ <rect class="badbox" x="340" y="10" width="310" height="180" rx="8"/>
+ <text x="354" y="36" class="b">var p *MyErr; err = p</text>
+ <rect class="hl2" x="354" y="54" width="135" height="46"/><rect class="cell" x="489" y="54" width="135" height="46"/>
+ <text x="366" y="74" class="m">type</text><text x="366" y="92" class="b">*MyErr</text>
+ <text x="501" y="74" class="m">value</text><text x="501" y="92">nil</text>
+ <text x="354" y="136" class="badt">err == nil  → false</text>
+ <text x="354" y="164" class="m">type đã có → KHÔNG nil!</text>
+</svg>
+<p class="legend">Quy tắc: <code>i == nil</code> ⇔ <b>cả</b> dynamic type <b>và</b> dynamic value đều nil.</p>
+</div>
+<div class="card">
+<pre class="no"><code>// ✗ SAI: biến kiểu cụ thể *MyErr được "đóng gói" vào error
+func validate(ok bool) error {
+    var p *MyErr
+    if !ok { p = &amp;MyErr{"dữ liệu sai"} }
+    return p               // (*MyErr, nil) != nil
+}
+err := validate(true)
+fmt.Println(err == nil)    // false 😱</code></pre>
+<pre class="yes"><code>// ✓ ĐÚNG: trả về nil tường minh
+func validate(ok bool) error {
+    if !ok { return &amp;MyErr{"dữ liệu sai"} }
+    return nil
+}
+fmt.Println(validate(true) == nil) // true</code></pre>
+<p><b>Cách tránh:</b> hàm trả về <code>error</code> thì kiểu khai báo trả về luôn là <code>error</code>, không phải <code>*MyErr</code>; không trả một biến con trỏ có thể nil; dùng <code>errors.As</code> để lấy lỗi cụ thể.</p>
+</div>
+</div>
+
+<!-- ================= 5 ================= -->
+<h2 id="s5">5. Type assertion &amp; type switch</h2>
+<div class="grid g2w">
+<div class="card">
+<svg viewBox="0 0 660 180" role="img" aria-label="Luồng xử lý type assertion">
+ <defs><marker id="m5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="ha"/></marker></defs>
+ <rect class="box" x="10" y="66" width="100" height="44" rx="6"/><text x="34" y="93" class="b">i.(T)</text>
+ <path class="arr" d="M110,88 L146,88" marker-end="url(#m5)"/>
+ <rect class="ibox" x="150" y="56" width="210" height="64" rx="28"/>
+ <text x="170" y="82">dynamic type == T ?</text>
+ <text x="160" y="104" class="m">(T interface: đủ method?)</text>
+ <path class="arr" d="M360,76 C385,76 385,30 406,30" marker-end="url(#m5)"/><text x="372" y="46" class="m">có</text>
+ <rect class="okbox" x="410" y="10" width="240" height="40" rx="6"/><text x="422" y="35" class="okt">✓ v có kiểu T</text>
+ <path class="arr" d="M360,90 L406,90" marker-end="url(#m5)"/>
+ <rect class="warnbox" x="410" y="70" width="240" height="40" rx="6"/><text x="422" y="95" class="warnt">v, ok := i.(T) → ok=false</text>
+ <path class="arr" d="M360,104 C385,104 385,150 406,150" marker-end="url(#m5)"/><text x="366" y="138" class="m">không</text>
+ <rect class="badbox" x="410" y="130" width="240" height="40" rx="6"/><text x="422" y="155" class="badt">v := i.(T)  → panic!</text>
+</svg>
+<pre><code>var x any = 42
+n, ok := x.(int)      // 42 true
+s, ok := x.(string)   // "" false   (an toàn)
+s := x.(string)       // panic: interface conversion:
+                      // interface {} is int, not string
+
+// Kiểm tra "khả năng" thay vì kiểu cụ thể:
+if sw, ok := w.(io.StringWriter); ok {
+    sw.WriteString("nhanh hơn")
+}</code></pre>
+</div>
+<div class="card">
+<pre><code>func describe(v any) string {
+    switch x := v.(type) {
+    case nil:
+        return "nil"
+    case int, int64:     // nhiều type → x vẫn là any
+        return fmt.Sprintf("số nguyên %v", x)
+    case string:         // x là string
+        return fmt.Sprintf("chuỗi dài %d", len(x))
+    case error:          // interface cụ thể trước
+        return "error: " + x.Error()
+    case Speaker:
+        return "biết nói -> " + x.Speak()
+    default:
+        return fmt.Sprintf("không rõ (%T)", x)
+    }
+}</code></pre>
+<ul>
+<li><code>case</code> được xét <b>từ trên xuống</b>, khớp case đầu tiên. Đặt interface hẹp/cụ thể trước interface rộng.</li>
+<li><code>.(type)</code> chỉ dùng được trong <code>switch</code>.</li>
+<li>Type switch nhiều nhánh thường là dấu hiệu nên chuyển sang method trên interface (đa hình).</li>
+</ul>
+</div>
+</div>
+
+<!-- ================= 6 ================= -->
+<h2 id="s6">6. Embedding: ghép interface nhỏ thành lớn</h2>
+<div class="grid g2w">
+<div class="card">
+<svg viewBox="0 0 660 190" role="img" aria-label="io.ReadWriter và io.ReadWriteCloser ghép từ Reader, Writer, Closer">
+ <defs><marker id="m6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="ha"/></marker></defs>
+ <rect class="ibox" x="15" y="12" width="180" height="50" rx="6"/><text x="27" y="33" class="b">io.Reader</text><text x="27" y="52" class="m">Read(p []byte)</text>
+ <rect class="ibox" x="240" y="12" width="180" height="50" rx="6"/><text x="252" y="33" class="b">io.Writer</text><text x="252" y="52" class="m">Write(p []byte)</text>
+ <rect class="ibox" x="465" y="12" width="180" height="50" rx="6"/><text x="477" y="33" class="b">io.Closer</text><text x="477" y="52" class="m">Close() error</text>
+ <rect class="box" x="90" y="128" width="210" height="50" rx="6"/><text x="102" y="149" class="b">io.ReadWriter</text><text x="102" y="168" class="m">Reader + Writer</text>
+ <rect class="box" x="340" y="128" width="270" height="50" rx="6"/><text x="352" y="149" class="b">io.ReadWriteCloser</text><text x="352" y="168" class="m">Reader + Writer + Closer</text>
+ <path class="arr" d="M105,62 L160,124" marker-end="url(#m6)"/>
+ <path class="arr" d="M310,62 L240,124" marker-end="url(#m6)"/>
+ <path class="arr" d="M125,62 L390,124" marker-end="url(#m6)"/>
+ <path class="arr" d="M340,62 L460,124" marker-end="url(#m6)"/>
+ <path class="arr" d="M555,62 L560,124" marker-end="url(#m6)"/>
+</svg>
+<pre><code>type ReadWriter interface {
+    Reader   // nhúng interface = gộp method set
+    Writer
+}
+// Trùng tên method có cùng chữ ký: được phép (Go 1.14+)</code></pre>
+</div>
+<div class="card">
+<h3>Nhúng interface vào <b>struct</b>: override một phần</h3>
+<pre><code>type loudSpeaker struct {
+    Speaker              // ủy quyền mọi method
+}
+func (l loudSpeaker) Speak() string {
+    return strings.ToUpper(l.Speaker.Speak())
+}
+
+loudSpeaker{Dog{"Rex"}}.Speak() // REX: GÂU!
+loudSpeaker{}.Speak()           // 💥 panic: Speaker nil</code></pre>
+<p>Hay dùng để bọc (decorator) hoặc tạo fake chỉ implement vài method của interface lớn. <span class="tag warn">Cẩn thận</span> method nào chưa override mà field nhúng nil thì gọi vào sẽ panic.</p>
+</div>
+</div>
+
+<!-- ================= 7 ================= -->
+<h2 id="s7">7. <code>any</code>, so sánh interface, interface trong generics</h2>
+<div class="grid g2">
+<div class="card">
+<h3><code>any</code> = <code>interface{}</code></h3>
+<p>Mọi type đều thỏa (method set rỗng). Mất type safety, phải assertion để dùng lại.</p>
+<pre><code>var v any = []int{1, 2}
+v = "giờ là string"   // OK
+// v + "x"            // ✗ không compile</code></pre>
+<p><b>Dùng khi:</b> thực sự không biết kiểu (JSON động, <code>fmt.Println</code>, context value). <b>Tránh khi:</b> generics làm được (container, thuật toán).</p>
+</div>
+<div class="card">
+<h3>So sánh <code>==</code></h3>
+<pre><code>any(1) == any(1)          // true
+any(1) == any(int64(1)) // false
+any(Dog{"Rex"}) == any(Dog{"Rex"})
+                          // true
+
+a, b := any([]int{1}), any([]int{1})
+a == b  // 💥 panic: comparing
+        //    uncomparable type []int
+m := map[any]int{}
+m[[]int{1}] = 1 // 💥 panic: unhashable</code></pre>
+<p>Compile vẫn qua, lỗi chỉ xuất hiện lúc chạy.</p>
+</div>
+<div class="card">
+<h3>Interface làm constraint (type set)</h3>
+<pre><code>type Number interface {
+    // ~int: mọi type có kiểu gốc int
+    ~int | ~int64 | ~float64
+}
+func Sum[T Number](xs []T) T {
+    var t T
+    for _, x := range xs { t += x }
+    return t
+}
+Sum([]Celsius{10, 20.5}) // 30.5°C
+
+var n Number // ✗ cannot use type Number
+             // outside a type constraint</code></pre>
+</div>
+</div>
+
+<div class="card" style="margin-top:14px">
+<h3>Interface hay generics?</h3>
+<div class="tw"><table>
+<tr><th></th><th>Interface (đa hình runtime)</th><th>Generics (đa hình compile-time)</th></tr>
+<tr><td>Khi nào</td><td>Các type có <b>hành vi khác nhau</b> sau cùng một method (Reader từ file, mạng, bộ nhớ)</td><td>Cùng <b>một thuật toán</b> cho nhiều kiểu dữ liệu (Sum, Map, Stack[T])</td></tr>
+<tr><td>Tập phần tử hỗn hợp</td><td><code>[]Shape</code> chứa Circle lẫn Rect ✓</td><td><code>[]T</code> chỉ một kiểu T</td></tr>
+<tr><td>Chi phí</td><td>Gọi gián tiếp, có thể cấp phát heap</td><td>Thường nhanh hơn, giữ type safety</td></tr>
+</table></div>
+</div>
+
+<!-- ================= 8 ================= -->
+<h2 id="s8">8. Interface chuẩn nên thuộc lòng</h2>
+<div class="card">
+<div class="tw"><table>
+<tr><th>Interface</th><th>Method</th><th>Dùng để</th></tr>
+<tr><td><code>error</code></td><td><code>Error() string</code></td><td>Mọi lỗi trong Go</td></tr>
+<tr><td><code>fmt.Stringer</code></td><td><code>String() string</code></td><td>Định dạng khi in bằng <code>%v</code>, <code>%s</code>, <code>Println</code></td></tr>
+<tr><td><code>io.Reader</code> / <code>io.Writer</code></td><td><code>Read(p []byte) (n int, err error)</code><br><code>Write(p []byte) (n int, err error)</code></td><td>Luồng byte: file, mạng, buffer, gzip, hash…</td></tr>
+<tr><td><code>io.Closer</code></td><td><code>Close() error</code></td><td>Giải phóng tài nguyên</td></tr>
+<tr><td><code>sort.Interface</code></td><td><code>Len()</code>, <code>Less(i, j)</code>, <code>Swap(i, j)</code></td><td>Sắp xếp kiểu cũ (nay ưu tiên <code>slices.SortFunc</code>)</td></tr>
+<tr><td><code>http.Handler</code></td><td><code>ServeHTTP(w ResponseWriter, r *Request)</code></td><td>Web server, middleware</td></tr>
+<tr><td><code>json.Marshaler</code> / <code>Unmarshaler</code></td><td><code>MarshalJSON() ([]byte, error)</code></td><td>Tùy biến JSON</td></tr>
+<tr><td><code>context.Context</code></td><td><code>Deadline</code>, <code>Done</code>, <code>Err</code>, <code>Value</code></td><td>Hủy, timeout, giá trị theo request</td></tr>
+</table></div>
+<pre><code>type Celsius float64
+func (c Celsius) String() string { return fmt.Sprintf("%.1f°C", float64(c)) }
+fmt.Println("Nhiệt độ:", Celsius(36.6))   // Nhiệt độ: 36.6°C</code></pre>
+</div>
+
+<!-- ================= 9 ================= -->
+<h2 id="s9">9. Ví dụ thực hành</h2>
+
+<h3>9.1 Interface phía consumer + fake để test (Dependency Injection)</h3>
+<div class="grid g2w">
+<div class="card">
+<svg viewBox="0 0 660 230" role="img" aria-label="Package store trả struct, package greet tự khai báo interface UserGetter">
+ <defs>
+  <marker id="m9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="hok"/></marker>
+ </defs>
+ <rect class="pkg" x="10" y="10" width="290" height="210" rx="8"/>
+ <text x="24" y="34" class="b">package store</text>
+ <rect class="box" x="24" y="48" width="262" height="108" rx="6"/>
+ <text x="36" y="70" class="b">type MemStore struct</text>
+ <text x="36" y="94" class="m">GetUser(id) (User, error)</text>
+ <text x="36" y="116" class="m">SaveUser(u User) error</text>
+ <text x="36" y="138" class="m">DeleteUser(id int)</text>
+ <text x="24" y="190">func NewMemStore() *MemStore</text>
+ <text x="24" y="210" class="m">trả về struct cụ thể</text>
+ <rect class="pkg" x="360" y="10" width="290" height="210" rx="8"/>
+ <text x="374" y="34" class="b">package greet</text>
+ <rect class="ibox" x="374" y="48" width="262" height="64" rx="6"/>
+ <text x="386" y="72" class="b">type UserGetter interface</text>
+ <text x="386" y="96">GetUser(id) (User, error)</text>
+ <rect class="box" x="374" y="124" width="262" height="36" rx="6"/>
+ <text x="386" y="147">Greeter{ users UserGetter }</text>
+ <rect class="warnbox" x="374" y="172" width="262" height="36" rx="6"/>
+ <text x="386" y="195" class="m">_test.go: fakeUsers (1 method)</text>
+ <path class="okl" d="M286,94 C320,94 330,80 370,80" marker-end="url(#m9)"/>
+ <text x="306" y="72" class="okt" style="font-size:12px">✓ ngầm</text>
+ <path class="okl" d="M636,190 C656,190 656,80 640,80" marker-end="url(#m9)"/>
+</svg>
+<p class="legend"><code>store</code> không import <code>greet</code>, cũng không cần biết <code>UserGetter</code>. <code>greet</code> chỉ phụ thuộc đúng 1 method nó cần → dễ thay thế, dễ test, không vòng import.</p>
+</div>
+<div class="card">
+<pre><code>// package greet: khai báo ĐÚNG thứ mình cần
+type UserGetter interface {
+    GetUser(id int) (User, error)
+}
+
+type Greeter struct{ users UserGetter }
+
+func (g Greeter) Greet(id int) string {
+    u, err := g.users.GetUser(id)
+    if errors.Is(err, ErrNotFound) { return "Xin chào người lạ" }
+    if err != nil { return "lỗi: " + err.Error() }
+    return "Xin chào " + u.Name
+}
+
+// main: lắp ráp
+Greeter{store.NewMemStore()}.Greet(1)  // Xin chào An
+
+// greet_test.go: fake không cần mock framework
+type fakeUsers map[int]User
+func (f fakeUsers) GetUser(id int) (User, error) {
+    if u, ok := f[id]; ok { return u, nil }
+    return User{}, ErrNotFound
+}
+Greeter{fakeUsers{5: {5, "Bình"}}}.Greet(5) // Xin chào Bình</code></pre>
+</div>
+</div>
+
+<div class="grid g2" style="margin-top:14px">
+<div class="card">
+<h3>9.2 Func adapter (mẫu <code>http.HandlerFunc</code>)</h3>
+<pre><code>type Handler interface{ Handle(msg string) string }
+
+// Một kiểu hàm cũng có method → thỏa interface
+type HandlerFunc func(string) string
+func (f HandlerFunc) Handle(m string) string { return f(m) }
+
+func logging(next Handler) Handler {   // middleware
+    return HandlerFunc(func(m string) string {
+        fmt.Println("[log] nhận:", m)
+        return next.Handle(m)
+    })
+}
+
+echo := HandlerFunc(func(m string) string { return "echo " + m })
+logging(echo).Handle("ping")
+// [log] nhận: ping → "echo ping"</code></pre>
+</div>
+<div class="card">
+<h3>9.3 Tự viết <code>io.Writer</code> &amp; nâng cấp tùy chọn</h3>
+<pre><code>type upperWriter struct{ w io.Writer }
+func (u upperWriter) Write(p []byte) (int, error) {
+    return u.w.Write(bytes.ToUpper(p))
+}
+// Chạy được với MỌI hàm nhận io.Writer / io.Reader
+io.Copy(upperWriter{os.Stdout}, strings.NewReader("hello\n"))
+// HELLO
+
+// Optional interface: kiểm tra khả năng mở rộng lúc chạy
+_, ok := w.(io.StringWriter)
+// *os.File: true · *strings.Builder: true · upperWriter: false</code></pre>
+<p class="legend">Stdlib dùng mẫu này rất nhiều: <code>io.WriterTo</code>, <code>io.ReaderFrom</code>, <code>http.Flusher</code>.</p>
+</div>
+</div>
+
+<!-- ================= 10 ================= -->
+<h2 id="s10">10. Lỗi hay gặp &amp; cách tránh</h2>
+<div class="grid g2">
+
+<div class="card pit">
+<h3><span class="num">1</span>Typed nil làm <code>err != nil</code></h3>
+<pre class="no"><code>var p *MyErr = nil
+return p   // error(*MyErr, nil) != nil</code></pre>
+<pre class="yes"><code>return nil // trả nil tường minh</code></pre>
+<p>Xem <a href="#s4">mục 4</a>. Kiểu trả về luôn là <code>error</code>.</p>
+</div>
+
+<div class="card pit">
+<h3><span class="num">2</span>Pointer receiver nhưng gán value</h3>
+<pre class="no"><code>func (r *Robot) Speak() string
+var s Speaker = Robot{} // ✗ compile error</code></pre>
+<pre class="yes"><code>var s Speaker = &amp;Robot{}</code></pre>
+<p>Thống nhất receiver: một method dùng pointer thì để tất cả dùng pointer.</p>
+</div>
+
+<div class="card pit">
+<h3><span class="num">3</span>Type assertion không có <code>ok</code></h3>
+<pre class="no"><code>name := v.(string) // panic nếu v không phải string</code></pre>
+<pre class="yes"><code>name, ok := v.(string)
+if !ok { return fmt.Errorf("cần string, nhận %T", v) }</code></pre>
+</div>
+
+<div class="card pit">
+<h3><span class="num">4</span>Con trỏ tới interface</h3>
+<pre class="no"><code>func Run(s *Speaker) { s.Speak() }
+// p.Speak undefined (type *Speaker is
+// pointer to interface, not interface)</code></pre>
+<pre class="yes"><code>func Run(s Speaker) { s.Speak() }</code></pre>
+<p>Interface đã chứa con trỏ bên trong; hầu như không bao giờ cần <code>*I</code>.</p>
+</div>
+
+<div class="card pit">
+<h3><span class="num">5</span><code>[]T</code> không tự chuyển thành <code>[]I</code></h3>
+<pre class="no"><code>var ss []Speaker = dogs // ✗ cannot use []Dog as []Speaker</code></pre>
+<pre class="yes"><code>ss := make([]Speaker, len(dogs))
+for i, d := range dogs { ss[i] = d }</code></pre>
+<p>Bộ nhớ khác nhau: mỗi phần tử <code>[]Speaker</code> là 2 word. Hoặc viết hàm generic <code>func F[T Speaker](xs []T)</code>.</p>
+</div>
+
+<div class="card pit">
+<h3><span class="num">6</span>So sánh / map key với type không so sánh được</h3>
+<pre class="no"><code>any([]int{1}) == any([]int{1}) // panic
+map[any]bool{}[[]int{1}] = true // panic</code></pre>
+<p><b>Tránh:</b> chỉ dùng <code>==</code> / map key khi chắc dynamic type comparable; hoặc dùng constraint <code>comparable</code> trong generics để compiler kiểm tra.</p>
+</div>
+
+<div class="card pit">
+<h3><span class="num">7</span>Tưởng sửa được giá trị qua interface</h3>
+<pre class="no"><code>var s Speaker = Dog{"Rex"}
+s.(Dog).Name = "Max" // ✗ neither addressable</code></pre>
+<pre class="yes"><code>var s Speaker = &amp;Dog{"Rex"}
+s.(*Dog).Name = "Max" // ✓ sửa qua con trỏ</code></pre>
+</div>
+
+<div class="card pit">
+<h3><span class="num">8</span><code>String()</code> đệ quy vô hạn</h3>
+<pre class="no"><code>func (c Celsius) String() string {
+    return fmt.Sprint(c) // gọi lại String() → stack overflow
+}</code></pre>
+<pre class="yes"><code>return fmt.Sprintf("%.1f°C", float64(c)) // ép về kiểu gốc</code></pre>
+</div>
+
+<div class="card pit">
+<h3><span class="num">9</span>Field interface nhúng để nil</h3>
+<pre class="no"><code>type loud struct{ Speaker }
+loud{}.Speak() // panic: nil pointer dereference</code></pre>
+<p><b>Tránh:</b> dùng constructor bắt buộc truyền dependency; kiểm tra nil trong constructor.</p>
+</div>
+
+<div class="card pit">
+<h3><span class="num">10</span>Interface pollution (Java-style)</h3>
+<pre class="no"><code>// package store
+type UserStore interface { /* 15 method */ }
+type userStore struct{...}
+func New() UserStore { return &amp;userStore{} }</code></pre>
+<pre class="yes"><code>func New() *Store { return &amp;Store{} } // trả struct
+// consumer tự định nghĩa interface nhỏ nó cần</code></pre>
+<p>Interface lớn, khai báo sẵn ở producer, chỉ 1 implementation: khó mở rộng, khó fake, giấu mất method mới.</p>
+</div>
+
+<div class="card pit">
+<h3><span class="num">11</span>Thứ tự case trong type switch</h3>
+<pre class="no"><code>switch v.(type) {
+case fmt.Stringer: ... // lỗi có cả String() → rơi vào đây
+case error:        ... // không bao giờ tới
+}</code></pre>
+<p><b>Tránh:</b> đặt case cụ thể (concrete type, interface hẹp) lên trước.</p>
+</div>
+
+<div class="card pit">
+<h3><span class="num">12</span>Lạm dụng <code>any</code></h3>
+<pre class="no"><code>func Max(a, b any) any // mất type safety, phải assert</code></pre>
+<pre class="yes"><code>func Max[T cmp.Ordered](a, b T) T // hoặc dùng built-in max()</code></pre>
+</div>
+
+</div>
+
+<!-- ================= 11 ================= -->
+<h2 id="s11">11. Best practices</h2>
+<div class="grid g2w">
+<div class="card">
+<h3>Có nên tạo interface?</h3>
+<svg viewBox="0 0 660 250" role="img" aria-label="Lưu đồ quyết định có nên tạo interface">
+ <defs><marker id="m11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" class="ha"/></marker></defs>
+ <rect class="ibox" x="170" y="8" width="320" height="54" rx="8"/>
+ <text x="186" y="31">Có ≥ 2 implementation thật?</text>
+ <text x="186" y="51" class="m">(tính cả fake trong test)</text>
+ <path class="arr" d="M220,62 L120,96" marker-end="url(#m11)"/><text x="130" y="76" class="m">không</text>
+ <rect class="warnbox" x="10" y="100" width="190" height="56" rx="8"/>
+ <text x="22" y="123" class="warnt">Dùng struct cụ thể</text>
+ <text x="22" y="143" class="m">chờ đến khi cần</text>
+ <path class="arr" d="M350,62 L350,96" marker-end="url(#m11)"/><text x="358" y="84" class="m">có</text>
+ <rect class="ibox" x="220" y="100" width="260" height="50" rx="8"/>
+ <text x="234" y="130">Consumer chỉ cần vài method?</text>
+ <path class="arr" d="M350,150 L350,186" marker-end="url(#m11)"/><text x="358" y="174" class="m">có</text>
+ <rect class="okbox" x="200" y="190" width="300" height="52" rx="8"/>
+ <text x="212" y="212" class="okt">Interface NHỎ ở phía consumer</text>
+ <text x="212" y="232" class="m">(1–3 method, tên đuôi -er)</text>
+ <path class="arr" d="M480,125 L508,125" marker-end="url(#m11)"/><text x="482" y="116" class="m">không</text>
+ <rect class="badbox" x="512" y="100" width="142" height="56" rx="8"/>
+ <text x="522" y="123" class="badt">Tách nhỏ</text>
+ <text x="522" y="143" class="m">theo vai trò</text>
+</svg>
+<blockquote class="rule" style="margin:10px 0 0">“The bigger the interface, the weaker the abstraction.” (Rob Pike, Go Proverbs)</blockquote>
+</div>
+<div class="card">
+<div class="grid" style="gap:10px">
+<div class="card bp"><b>1. Accept interfaces, return structs.</b> Tham số nhận interface (linh hoạt cho caller); giá trị trả về là kiểu cụ thể (caller dùng được mọi method, không bị bẫy typed nil).</div>
+<div class="card bp"><b>2. Khai báo interface ở phía consumer,</b> không phải nơi implement. Package dùng gì thì khai báo đúng cái đó.</div>
+<div class="card bp"><b>3. Nhỏ và đặt tên theo hành vi:</b> <code>Reader</code>, <code>Notifier</code>, <code>UserGetter</code>. Interface 1 method đặt tên <i>Method + er</i>.</div>
+<div class="card bp"><b>4. Discover, đừng design trước:</b> viết code cụ thể trước, tách interface khi xuất hiện nhu cầu thật (implementation thứ 2, cần fake test).</div>
+</div>
+</div>
+</div>
+
+<div class="grid g2" style="margin-top:14px">
+<div class="card bp"><h3>5. Assertion lúc compile</h3>
+<pre><code>var _ http.Handler = (*Server)(nil)
+var _ io.ReadWriter = (*Buffer)(nil)</code></pre>
+<p>Gãy build ngay khi đổi chữ ký method, thay vì lỗi ở nơi xa.</p></div>
+
+<div class="card bp"><h3>6. Lỗi: nil tường minh + errors.Is/As</h3>
+<pre><code>var nf *NotFoundError
+if errors.As(err, &amp;nf) { ... }
+if errors.Is(err, ErrNotFound) { ... }</code></pre>
+<p>Không so sánh <code>err.Error()</code> bằng chuỗi; không trả typed nil.</p></div>
+
+<div class="card bp"><h3>7. Generics thay cho <code>any</code></h3>
+<p>Container, thuật toán dùng type parameter: giữ type safety, không cần assertion. <code>any</code> chỉ cho dữ liệu thực sự động.</p></div>
+
+<div class="card bp"><h3>8. Optional interface</h3>
+<p>Giữ interface chính tối giản; năng lực bổ sung kiểm tra bằng assertion: <code>if f, ok := w.(http.Flusher); ok { f.Flush() }</code>.</p></div>
+
+<div class="card bp"><h3>9. Func adapter cho interface 1 method</h3>
+<p>Cung cấp <code>XxxFunc</code> như <code>http.HandlerFunc</code> để caller truyền closure, không phải tạo struct.</p></div>
+
+<div class="card bp"><h3>10. Thống nhất receiver</h3>
+<p>Struct có state/mutex hoặc lớn → pointer receiver cho <b>tất cả</b> method. Kiểu nhỏ, bất biến (<code>time.Time</code>, <code>Celsius</code>) → value receiver.</p></div>
+
+<div class="card bp"><h3>11. Ghi tài liệu cho contract</h3>
+<p>Chữ ký chưa đủ: mô tả hành vi khi lỗi, có an toàn đồng thời không, ai sở hữu buffer. Ví dụ doc của <code>io.Reader</code> nói rõ được phép trả <code>n &gt; 0</code> cùng <code>err</code>.</p></div>
+
+<div class="card bp"><h3>12. Chú ý hiệu năng ở hot path</h3>
+<p>Interface = gọi gián tiếp + có thể cấp phát. Đo bằng <code>go test -bench</code>, <code>-gcflags=-m</code> (escape analysis) trước khi tối ưu; PGO có thể devirtualize.</p></div>
+</div>
+
+<!-- ================= 12 ================= -->
+<h2 id="s12">12. Bảng tra nhanh</h2>
+<div class="card">
+<div class="tw"><table>
+<tr><th>Muốn…</th><th>Viết</th></tr>
+<tr><td>Khai báo interface</td><td><code>type Shape interface { Area() float64 }</code></td></tr>
+<tr><td>Ghép interface</td><td><code>type RW interface { io.Reader; io.Writer }</code></td></tr>
+<tr><td>Kiểm tra implement lúc compile</td><td><code>var _ Shape = (*Circle)(nil)</code></td></tr>
+<tr><td>Lấy kiểu cụ thể an toàn</td><td><code>c, ok := s.(*Circle)</code></td></tr>
+<tr><td>Phân nhánh theo kiểu</td><td><code>switch v := x.(type) { case int: … }</code></td></tr>
+<tr><td>Kiểm tra có method bổ sung</td><td><code>if sw, ok := w.(io.StringWriter); ok { … }</code></td></tr>
+<tr><td>In dynamic type</td><td><code>fmt.Printf("%T", s)</code></td></tr>
+<tr><td>Interface rỗng</td><td><code>any</code> (alias của <code>interface{}</code>)</td></tr>
+<tr><td>Kiểm tra lỗi theo kiểu</td><td><code>errors.As(err, &amp;target)</code></td></tr>
+<tr><td>Constraint generics</td><td><code>type Number interface { ~int | ~float64 }</code></td></tr>
+<tr><td>Hàm làm implementation</td><td><code>type HandlerFunc func(…); func (f HandlerFunc) Handle(…) { f(…) }</code></td></tr>
+</table></div>
+</div>
+
+<div class="rule" style="margin-top:18px"><b>Chạy thử:</b> <code>cd src &amp;&amp; go run interface_examples.go</code>. File gồm 11 phần tương ứng các mục trên (thỏa ngầm định, typed nil, type switch, io.Writer, so sánh gây panic, Stringer, DI + fake, HandlerFunc, generics).</div>
+
+</div>
+<script>
+// Tô màu cú pháp Go đơn giản cho các khối <pre><code>
+(function(){
+ var KW=/\b(func|type|interface|struct|return|var|const|if|else|for|range|switch|case|default|package|import|defer|go|map|chan|nil|true|false|any|error|string|int|int64|float64|byte|bool)\b/;
+ var RE=new RegExp('(\\/\\/[^\\n]*)|("(?:[^"\\\\\\n]|\\\\.)*"|`[^`]*`)|'+KW.source,'g');
+ function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+ document.querySelectorAll('pre code').forEach(function(el){
+  var src=el.textContent,out='',last=0,m;
+  RE.lastIndex=0;
+  while((m=RE.exec(src))){
+   out+=esc(src.slice(last,m.index));
+   var cls=m[1]?'c':m[2]?'s':'k';
+   out+='<span class="'+cls+'">'+esc(m[0])+'</span>';
+   last=RE.lastIndex;
+  }
+  el.innerHTML=out+esc(src.slice(last));
+ });
+})();
+</script>
+</body>
+</html>
